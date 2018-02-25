@@ -12,6 +12,11 @@ var {authenticate} = require('./middleware/authenticate');
 const app = express();
 const port = process.env.PORT || 3000;
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
 app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
@@ -127,9 +132,9 @@ app.post('/users/login', (req, res) => {
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);
-    }).catch((e) => {
-      res.status(400).send();
     });
+  }).catch((e) => {
+    res.status(400).send();
   });
 });
 
