@@ -38,6 +38,13 @@ var UserSchema = new mongoose.Schema({
   }]
 });
 
+UserSchema.methods.toJSON = function () {
+  var user = this;
+  var userObject = user.toObject();
+
+  return _.pick(userObject, ['_id', 'name', 'email']);
+}
+
 UserSchema.methods.generateAuthToken = function () {
   var user = this;
   var access = 'auth';
@@ -50,12 +57,16 @@ UserSchema.methods.generateAuthToken = function () {
   });
 };
 
-UserSchema.methods.toJSON = function () {
+UserSchema.methods.removeToken = function (token) {
   var user = this;
-  var userObject = user.toObject();
 
-  return _.pick(userObject, ['_id', 'name', 'email']);
-}
+  return user.update({
+    $pull: {
+      tokens: { token }
+    }
+  });
+
+};
 
 UserSchema.statics.findByToken = function(token) { // statics means model method as opposed to instance method
   var User = this;
